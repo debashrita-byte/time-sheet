@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treasure Hunt Game</title>
+    <style>
+        /* Styling goes here */
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Enter Your Details to Start the Treasure Hunt</h2>
+    <form id="treasureHuntForm">
+        <h3>Member 1</h3>
+        <label for="name1">Name:</label>
+        <input type="text" id="name1" name="name1" required>
+
+        <label for="department1">Department:</label>
+        <input type="text" id="department1" name="department1" required>
+
+        <h3>Member 2</h3>
+        <label for="name2">Name:</label>
+        <input type="text" id="name2" name="name2" required>
+
+        <label for="department2">Department:</label>
+        <input type="text" id="department2" name="department2" required>
+
+        <h3>Member 3</h3>
+        <label for="name3">Name:</label>
+        <input type="text" id="name3" name="name3" required>
+
+        <label for="department3">Department:</label>
+        <input type="text" id="department3" name="department3" required>
+
+        <button type="submit">Start Treasure Hunt</button>
+    </form>
+    
+    <div id="timer"></div>
+</div>
+
+<script>
+    let startTime;
+
+    document.getElementById('treasureHuntForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the form from submitting the default way
+
+        // Record the start time
+        startTime = new Date();
+
+        // Get user inputs for all members
+        const name1 = document.getElementById('name1').value;
+        const department1 = document.getElementById('department1').value;
+        const name2 = document.getElementById('name2').value;
+        const department2 = document.getElementById('department2').value;
+        const name3 = document.getElementById('name3').value;
+        const department3 = document.getElementById('department3').value;
+
+        // Start a 30-minute timer (1800 seconds)
+        let timeLeft = 1800;
+        const timerDisplay = document.getElementById('timer');
+        const countdown = setInterval(() => {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `Time left: ${minutes} minutes, ${seconds} seconds`;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                alert('Time is up!');
+
+                // Record end time and calculate time taken
+                const endTime = new Date();
+                const timeTaken = Math.round((endTime - startTime) / 1000); // Time in seconds
+
+                // Send data to Google Sheets
+                const formData = new FormData();
+                formData.append('name1', name1);
+                formData.append('department1', department1);
+                formData.append('name2', name2);
+                formData.append('department2', department2);
+                formData.append('name3', name3);
+                formData.append('department3', department3);
+                formData.append('timeTaken', timeTaken);
+
+                fetch('https://script.google.com/macros/s/AKfycbyD1AcbnDSge2HcezVezODNjjaGAm7I0cBbsv0za27GlqvAn9V1XbcfNkwjyI1y_kft/exec', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    alert('Data successfully sent to the Google Sheet');
+                }).catch(error => {
+                    console.error('Error submitting the form', error);
+                });
+            }
+        }, 1000);
+    });
+</script>
+
+</body>
+</html>
